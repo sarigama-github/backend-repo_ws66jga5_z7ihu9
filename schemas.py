@@ -1,48 +1,53 @@
 """
-Database Schemas
+Database Schemas for Smart Krishi
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model represents a MongoDB collection.
+Collection name is the lowercase of the class name.
 """
-
 from pydantic import BaseModel, Field
-from typing import Optional
-
-# Example schemas (replace with your own):
+from typing import List, Optional, Literal
+from datetime import datetime
 
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
-    name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    userId: Optional[str] = Field(None, description="Public user id (same as _id string)")
+    name: str
+    phone: str
+    village: Optional[str] = None
+    district: Optional[str] = None
+    crops: List[str] = Field(default_factory=list)
+    createdAt: Optional[datetime] = None
 
-class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+class CropDiagnosis(BaseModel):
+    diagnosisId: Optional[str] = None
+    userId: str
+    crop: str
+    imageURL: Optional[str] = None
+    diseaseName: str
+    probability: float
+    recommendation: str
+    pesticide: Optional[str] = None
+    date: Optional[datetime] = None
 
-# Add your own schemas here:
-# --------------------------------------------------
+class WeatherAlert(BaseModel):
+    userId: str
+    location: str
+    lastAlertSent: Optional[datetime] = None
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class MandiPrice(BaseModel):
+    mandiId: Optional[str] = None
+    district: str
+    crop: str
+    price: float
+    updatedAt: Optional[datetime] = None
+
+class Notification(BaseModel):
+    userId: str
+    type: Literal["weather", "mandi", "fertilizer"]
+    message: str
+    timestamp: Optional[datetime] = None
+
+class OTPVerification(BaseModel):
+    phone: str
+    code: str
+    expiresAt: datetime
+    verified: bool = False
